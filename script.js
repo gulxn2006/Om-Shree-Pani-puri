@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initBackToTop();
   initNavHighlighting();
   initDeveloperModal();
+  initMobileNav();
 });
 
 /* ==========================================================================
@@ -194,4 +195,68 @@ function initDeveloperModal() {
   }
   if (devLinkEl) devLinkEl.href = savedPortfolio;
   if (footerDevLink) footerDevLink.href = savedPortfolio;
+}
+
+/* ==========================================================================
+   8. MOBILE HAMBURGER NAVIGATION DRAWER
+   ========================================================================== */
+function initMobileNav() {
+  const hamburgerBtn = document.getElementById('hamburger-btn');
+  const mobileDrawer = document.getElementById('mobile-nav-drawer');
+  if (!hamburgerBtn || !mobileDrawer) return;
+
+  function toggleMenu(forceState) {
+    const isCurrentlyOpen = hamburgerBtn.classList.contains('active');
+    const shouldOpen = forceState !== undefined ? forceState : !isCurrentlyOpen;
+
+    if (shouldOpen) {
+      hamburgerBtn.classList.add('active');
+      hamburgerBtn.setAttribute('aria-expanded', 'true');
+      mobileDrawer.classList.add('open');
+      mobileDrawer.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('mobile-nav-open');
+    } else {
+      hamburgerBtn.classList.remove('active');
+      hamburgerBtn.setAttribute('aria-expanded', 'false');
+      mobileDrawer.classList.remove('open');
+      mobileDrawer.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('mobile-nav-open');
+    }
+  }
+
+  hamburgerBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMenu();
+  });
+
+  // Close when clicking any nav link
+  const drawerLinks = mobileDrawer.querySelectorAll('a');
+  drawerLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      toggleMenu(false);
+    });
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click', (e) => {
+    if (mobileDrawer.classList.contains('open') && 
+        !mobileDrawer.contains(e.target) && 
+        !hamburgerBtn.contains(e.target)) {
+      toggleMenu(false);
+    }
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileDrawer.classList.contains('open')) {
+      toggleMenu(false);
+    }
+  });
+
+  // Close when resizing back to desktop width
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768 && mobileDrawer.classList.contains('open')) {
+      toggleMenu(false);
+    }
+  }, { passive: true });
 }
